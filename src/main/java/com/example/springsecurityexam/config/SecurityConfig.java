@@ -27,14 +27,28 @@ public class SecurityConfig {
                     registry.requestMatchers("/user/**").authenticated()
                             .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
                             .requestMatchers("/admin/**").hasRole("ADMIN")
-                            .anyRequest().permitAll())
-            .formLogin(configurer -> configurer.loginPage("/login"));
+                            .anyRequest().permitAll()
+            )
+            .formLogin(configurer ->
+                        configurer.loginPage("/login")
+                                .loginProcessingUrl("/loginProc")
+                                .defaultSuccessUrl("/")
+                                // .usernameParameter() service에 파라미터로 넘어가는 username의 파라미터 이름을 바꿔줄 수 있습니다.
+            );
 
                 // requestMatchers : request 경로가 이쪽인 사람들은...
                 // authenticated : 인증(로그인)된 사람만 들어올 수 있다.
                 // hasAnyRole : 인증 뿐만 아니라 인가(권한)된 사람만 들어올 수 있다.
                 // hasAnyRole : 인증 뿐만 아니라 인가(권한)된 사람만 들어올 수 있다.
                 // anyRequest : 나머지 요청들은 인증/인가 설정이 없음
+                // loginPage: 로그인 페이지 url을 설정해서 권한이 없을 때 해당 페이지로 떨어지게 만들 수 있다
+                // loginProcessingUrl : 로그인 처리 로직을 수행하는 request URL을 security가 낚아채서 수행하게 한다
+                                        // 따라서 내가 controller를 만들지 않아도 됨
+                // defaultSuccessUrl : 로그인한 사용자를 redirect 시킬 기본 url
+                                    // 만약 이 사용자가 권한이 필요한 페이지에서 튕겨져나와서 로그인 페이지로 넘어와 로그인에 성공한 거라면
+                                    // 사용자가 본래 접속하려고 했던 권한 페이지로 자동 리다이렉트 시켜주고
+                                    // 만약 그런 페이지가 아니라 일반 공개된 페이지에서 넘어온 거라면 여기에 설정된 default url로 넘겨준다.
+
 
         return http.build();
     }
