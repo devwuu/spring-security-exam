@@ -12,3 +12,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 202778612592-50ncn2r5nocg5e10adck0hpvp09hj7hs.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile

@@ -1,5 +1,7 @@
 package com.example.springsecurityexam.config;
 
+import com.example.springsecurityexam.config.oauth.PrincipalOauth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,7 +19,10 @@ import org.springframework.security.web.SecurityFilterChain;
                                             // prePostEnabled는 true가 default값이다 PreAuthorize, PostAuthorize 어노테이션 활성
                                             // 권한 설정을 전역으로 하고 싶을 때는 requestMatchers 로 걸어주고
                                             // 일부만 설정하고 싶을 때는 이 어노테이션들을 활성화시켜서 사용하면 된다.
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final PrincipalOauth2UserService oauth2UserService;
 
     @Bean // 비밀번호 암호화
     public PasswordEncoder passwordEncoder(){
@@ -40,6 +45,18 @@ public class SecurityConfig {
                                 .loginProcessingUrl("/loginProc")
                                 .defaultSuccessUrl("/")
                                 // .usernameParameter() service에 파라미터로 넘어가는 username의 파라미터 이름을 바꿔줄 수 있습니다.
+            )
+                // 구글 로그인 프로세스
+                // 1. 로그인
+                // 2. 정상적으로 로그인 된 경우 코드를 줌 (인증)
+                // 3. 코드를 통해서 액세스 토큰을 받음
+                // 4. 액세스 코드를 사용해서 구글 사용자의 사용자 정보에 접근할 수 있음(접근 권한이 생김)
+                // 5 - 1. 사용자 프로필 정보를 가져와서 정보를 토대로 회원가입을 자동으로 진행 시키거나
+                // 5 - 2. 추가적인 정보를 더 받고 회원가입을 시켜주기도 함
+                // oauth client 라이브러리를 사용하면 코드를 받아서 처리할 필요 없이 바로 액세스 토큰과 사용자 프로필 정보를 받아올 수 있다.
+            .oauth2Login(configurer -> configurer
+                        .loginPage("/login") // google login page와 로그인 페이지를 맵핑 시켜줍니다.
+                    .userInfoEndpoint(config -> config.userService(oauth2UserService))
             );
 
                 // requestMatchers : request 경로가 이쪽인 사람들은...

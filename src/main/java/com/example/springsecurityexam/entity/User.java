@@ -24,6 +24,9 @@ public class User {
     private String email;
     private String role;
 
+    private String provider; // 소셜로그인 시 어느 sns를 사용했는지
+    private String providerId; // 소셜로그인 시 해당 sns의 id
+
     @CreatedDate
     private Instant createdAt;
 
