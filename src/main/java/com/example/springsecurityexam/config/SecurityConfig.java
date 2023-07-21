@@ -2,6 +2,7 @@ package com.example.springsecurityexam.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터 체인에 등록 됩니다
+@EnableMethodSecurity(securedEnabled = true) // secured 어노테이션 활성화,
+                                            // prePostEnabled는 true가 default값이다 PreAuthorize, PostAuthorize 어노테이션 활성
+                                            // 권한 설정을 전역으로 하고 싶을 때는 requestMatchers 로 걸어주고
+                                            // 일부만 설정하고 싶을 때는 이 어노테이션들을 활성화시켜서 사용하면 된다.
 public class SecurityConfig {
 
     @Bean // 비밀번호 암호화
@@ -25,7 +30,8 @@ public class SecurityConfig {
         http.csrf(configurer -> configurer.disable())
             .authorizeHttpRequests(registry ->
                     registry.requestMatchers("/user/**").authenticated()
-                            .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
+                            .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN") // prefix(ROLE_)이 자동으로 붙기 때문에 여기선 prefix를 제외한 문자열만 써주면 된다
+                                                                                                        // 단, DB에는 ROLE_을 붙여서 적어줘야 제대로 맵핑이 된다.
                             .requestMatchers("/admin/**").hasRole("ADMIN")
                             .anyRequest().permitAll()
             )
