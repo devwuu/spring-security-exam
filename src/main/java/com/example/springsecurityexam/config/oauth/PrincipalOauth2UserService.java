@@ -17,7 +17,9 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);// 이 함수를 타면 사용자 정보가 로드 됩니다.
+        // 구글 로그인 버튼 클릭 -> 구글 로그인 창 -> 로그인을 완료 -> 로그인 code를 리턴 -> access token 리턴  <<-- OAuth2UserRequest
+        // access token으로 사용자 정보 요청 -> 사용자 정보 리턴 받음 <<-- super.loadUser(userRequest)
 
-        return oAuth2User; // 이 함수를 타면 사용자 정보가 로드 됩니다.
+        return oAuth2User;
     }
 }

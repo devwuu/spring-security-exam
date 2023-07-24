@@ -1,6 +1,7 @@
 package com.example.springsecurityexam.config.auth;
 
 import com.example.springsecurityexam.entity.User;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,7 @@ import java.util.List;
 // 이 Authentication 객체 안에 User정보가 저장되는데 User정보는 UserDetails 타입의 객체이다.
 
 @Slf4j
+@ToString
 public class PrincipalDetails implements UserDetails {
                                 // 이렇게 userDetails 타입을 구현 시키게 돠면 다형성에 의거해서 Authentication 객체에
                                 // PrincipalDetails 타입을 넣을 수 있게 된다 (구현체니까~ )
