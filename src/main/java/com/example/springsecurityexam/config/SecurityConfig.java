@@ -24,11 +24,6 @@ public class SecurityConfig {
 
     private final PrincipalOauth2UserService oauth2UserService;
 
-    @Bean // 비밀번호 암호화
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
     @Bean // 시큐리티 기본 설정, 인증 및 인가 설정
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 

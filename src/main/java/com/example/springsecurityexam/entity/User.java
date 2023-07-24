@@ -14,6 +14,7 @@ import java.time.Instant;
 @Getter @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@Accessors(chain = true)
 public class User {
 
     @Id

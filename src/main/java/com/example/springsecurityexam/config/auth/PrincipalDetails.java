@@ -1,15 +1,18 @@
 package com.example.springsecurityexam.config.auth;
 
 import com.example.springsecurityexam.entity.User;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
 //  시큐리티가 /loginProc요청이 오면 낚아채서 로그인을 진행 시킨다
@@ -23,17 +26,26 @@ import java.util.List;
 
 @Slf4j
 @ToString
-public class PrincipalDetails implements UserDetails {
+@Getter
+public class PrincipalDetails implements UserDetails, OAuth2User {
                                 // 이렇게 userDetails 타입을 구현 시키게 돠면 다형성에 의거해서 Authentication 객체에
                                 // PrincipalDetails 타입을 넣을 수 있게 된다 (구현체니까~ )
 
-    private final User user;
+    private User user;
+    private Map<String, Object> attributes;
 
+    // 일반 로그인
     public PrincipalDetails(User user) {
         this.user = user;
     }
 
+    // OAuth 로그인
+    public PrincipalDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
+    }
 
+    // UserDetails 구현
     // 해당 유저의 권한을 return 하는 메서드
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -76,4 +88,24 @@ public class PrincipalDetails implements UserDetails {
     }
 
     // 각각의 메서드에 user 정보를 가지고 필요한 로직을 구현시키는 방향으로 작성하면 된다.
+    // UserDetails 구현
+
+
+    // OAuth2User 구현
+    @Override
+    public String getName() {
+        if(ObjectUtils.isEmpty(attributes) || ObjectUtils.isEmpty(attributes.get("sub"))){
+            return null;
+        }
+        return attributes.get("sub").toString();
+    }
+
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+    // OAuth2User 구현
+
+
 }

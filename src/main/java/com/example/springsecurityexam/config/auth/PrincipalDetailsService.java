@@ -21,6 +21,8 @@ public class PrincipalDetailsService implements UserDetailsService {
 
     private final UserRepository repository;
 
+    // 이 함수가 종료될 때 @AuthenticationPrincipal 어노테이션이 활성화 됩니다
+    // 오버라이딩 하지 않아도 활성화 됨.
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                                             // 파라미터 이름이 username이 아니면 제대로 매칭이 안되기 때문에

@@ -33,8 +33,9 @@ public class IndexController {
     }
 
     @GetMapping("/user")
-    public @ResponseBody String user(){
-        return "user";
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principal){
+                                    // OAuth2User, UserDetail 모두 PrincipalDetails로 구현했기 때문에 둘 다 이 타입으로 받을 수 있습니다.
+        return principal.getUser().toString();
     }
 
     @GetMapping("/admin")
@@ -89,29 +90,29 @@ public class IndexController {
         return "데이터 정보";
     }
 
-    @GetMapping("/test/login")
-    public @ResponseBody String loginTest(Authentication authentication,
-                                          // 세션에 저장되어 있는 인증 정보를 가져옵니다
-                                          @AuthenticationPrincipal PrincipalDetails principalDetails
-                                          // Authentication에 담겨있는 사용자 정보를 꺼내줍니다.
-                                          ){
-        log.info("authentication {}", (PrincipalDetails)authentication.getPrincipal());
-        // 단 OAuth 로그인 한 사람의 정보는 PrincipalDetails 로 타입 캐스팅이 되지 않기 때문에 에러가 발생한다.
-        log.info("principalDetails {}", principalDetails);
-        return "/test/login 세션 정보 확인";
-    }
+//    @GetMapping("/test/login")
+//    public @ResponseBody String loginTest(Authentication authentication,
+//                                          // 세션에 저장되어 있는 인증 정보를 가져옵니다
+//                                          @AuthenticationPrincipal PrincipalDetails principalDetails
+//                                          // Authentication에 담겨있는 사용자 정보를 꺼내줍니다.
+//                                          ){
+//        log.info("authentication {}", (PrincipalDetails)authentication.getPrincipal());
+//        // 단 OAuth 로그인 한 사람의 정보는 PrincipalDetails 로 타입 캐스팅이 되지 않기 때문에 에러가 발생한다.
+//        log.info("principalDetails {}", principalDetails);
+//        return "/test/login 세션 정보 확인";
+//    }
 
-    @GetMapping("/test/oauth/login")
-    public @ResponseBody String loginTest(Authentication authentication,
-                                        @AuthenticationPrincipal OAuth2User OAuth2User
-                                          // Authentication에 담겨있는 사용자 정보를 꺼내줍니다.
-    ){
-        OAuth2User principal = (OAuth2User) authentication.getPrincipal();
-        // 단 OAuth 로그인 한 사람의 정보는 OAuth2User 로 타입 캐스팅을 해줘야 합니다.
-        log.info("principal {}", principal.getAttributes());
-        log.info("OAuth2User {}", OAuth2User.getAttributes());
-        return "/test/oauth/login 세션 정보 확인";
-    }
+//    @GetMapping("/test/oauth/login")
+//    public @ResponseBody String loginTest(Authentication authentication,
+//                                        @AuthenticationPrincipal OAuth2User OAuth2User
+//                                          // Authentication에 담겨있는 사용자 정보를 꺼내줍니다.
+//    ){
+//        OAuth2User principal = (OAuth2User) authentication.getPrincipal();
+//        // 단 OAuth 로그인 한 사람의 정보는 OAuth2User 로 타입 캐스팅을 해줘야 합니다.
+//        log.info("principal {}", principal.getAttributes());
+//        log.info("OAuth2User {}", OAuth2User.getAttributes());
+//        return "/test/oauth/login 세션 정보 확인";
+//    }
 
 
 
