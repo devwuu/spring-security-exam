@@ -1,14 +1,21 @@
 package com.example.springsecurityexam.config;
 
 
+import com.example.springsecurityexam.auth.PrincipalService;
+import com.example.springsecurityexam.filter.JwtAuthenticationFilter;
 import com.example.springsecurityexam.filter.JwtFilter;
 import jakarta.servlet.Filter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AuthenticationFilter;
@@ -19,7 +26,23 @@ import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final PrincipalService service;
+    private final PasswordEncoder passwordEncoder;
+
+    // authenticationManager를 bean으로 등록해줍니다
+    @Bean
+    public AuthenticationManager authenticationManager(){
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        // DaoAuthenticationProvider 는 UserDetailService를 사용할 때 사용할 수 있는 AuthenticationProvider의 구현체입니다.
+
+        authProvider.setUserDetailsService(service);
+        authProvider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(authProvider);
+    }
 
     @Bean
     public UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource(){
@@ -40,6 +63,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilterBefore(new JwtFilter(), AuthorizationFilter.class)
                 .cors(configurer -> configurer.configurationSource(urlBasedCorsConfigurationSource()))
                 // @CrossOrigin 은 인증이 필요 없을 때 사용하고 인증이 필요한 경우에는 security filter에 등록해줘야 합니다.
