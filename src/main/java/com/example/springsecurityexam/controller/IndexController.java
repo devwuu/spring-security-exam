@@ -21,6 +21,21 @@ public class IndexController {
         return "home";
     }
 
+    @GetMapping("user")
+    public String user(){
+        return "user";
+    }
+
+    @GetMapping("manager")
+    public String manager(){
+        return "manager";
+    }
+
+    @GetMapping("admin")
+    public String admin(){
+        return "admin";
+    }
+
 
 
     @PostMapping("save")

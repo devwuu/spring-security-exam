@@ -78,7 +78,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Authentication authResult) throws IOException, ServletException {
 
         Instant expiredTime = LocalDateTime.now()
-                .plusMinutes(10)
+                .plusMinutes(10) // 사실 이런 하드코딩보다는 interface 같은 거 만들어서 긁어다가 쓰는 게 좋습니다.
                 .toInstant(ZoneOffset.of("+09:00"));
 
         UserPrincipal userPrincipal = (UserPrincipal)authResult.getPrincipal();
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(expiredTime) // 만료시간
                 .withClaim("id", userPrincipal.getId()) // 본문
                 .withClaim("username", userPrincipal.getUsername()) // 본문
-                .sign(Algorithm.HMAC512("test")); // 서명
+                .sign(Algorithm.HMAC512("test")); // 서명  // 사실 이런 하드코딩보다는 interface 같은 거 만들어서 긁어다가 쓰는 게 좋습니다.
 
         // 응답 헤더에 추가
         response.addHeader("Authorization", "Bearer "+token);

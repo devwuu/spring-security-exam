@@ -3,8 +3,8 @@ package com.example.springsecurityexam.config;
 
 import com.example.springsecurityexam.auth.PrincipalService;
 import com.example.springsecurityexam.filter.JwtAuthenticationFilter;
-import com.example.springsecurityexam.filter.JwtFilter;
-import jakarta.servlet.Filter;
+import com.example.springsecurityexam.filter.JwtAuthorizationFilter;
+import com.example.springsecurityexam.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,16 +13,12 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.AuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +27,7 @@ public class SecurityConfig {
 
     private final PrincipalService service;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository repository;
 
     // authenticationManager를 bean으로 등록해줍니다
     @Bean
@@ -64,7 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilterBefore(new JwtFilter(), AuthorizationFilter.class)
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), repository))
                 .cors(configurer -> configurer.configurationSource(urlBasedCorsConfigurationSource()))
                 // @CrossOrigin 은 인증이 필요 없을 때 사용하고 인증이 필요한 경우에는 security filter에 등록해줘야 합니다.
                 .csrf(configurer -> configurer.disable())
