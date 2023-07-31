@@ -1,5 +1,7 @@
 package com.example.springsecurityexam.filter;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.springsecurityexam.auth.UserPrincipal;
 import com.example.springsecurityexam.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +19,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 // UsernamePasswordAuthenticationFilter 를 상속받아서
 // security filter chain에 넣어주면
@@ -65,7 +71,28 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // attemptAuthentication 이 정상적으로 종료가 되면 실행되는 함수
     // 여기서 로그인된 사용자의 jwt 토큰을 발급/응답해주면 됩니다.
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        super.successfulAuthentication(request, response, chain, authResult);
+    protected void successfulAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain,
+            Authentication authResult) throws IOException, ServletException {
+
+        Instant expiredTime = LocalDateTime.now()
+                .plusMinutes(10)
+                .toInstant(ZoneOffset.of("+09:00"));
+
+        UserPrincipal userPrincipal = (UserPrincipal)authResult.getPrincipal();
+        String token = JWT.create()
+                .withSubject(userPrincipal.getUsername()) // 토큰이름
+                .withExpiresAt(expiredTime) // 만료시간
+                .withClaim("id", userPrincipal.getId()) // 본문
+                .withClaim("username", userPrincipal.getUsername()) // 본문
+                .sign(Algorithm.HMAC512("test")); // 서명
+
+        // 응답 헤더에 추가
+        response.addHeader("Authorization", "Bearer "+token);
+
+        log.info("token {}", token);
+
     }
 }

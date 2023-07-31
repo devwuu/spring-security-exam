@@ -19,6 +19,11 @@ public class UserPrincipal implements UserDetails {
         this.user = user;
     }
 
+    public Long getId(){
+        return user.id();
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Optional<List<String>> roles= user.getAllRoles();
