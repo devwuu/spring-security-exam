@@ -11,8 +11,6 @@
 
 ## (Spring boot 3.X + Spring Security 6.X) 변경사항
 
-<br/>
-
 ### 1. SecurityFilterChain 설정 방법 변경
 * 람다를 사용해서 설정합니다.
 * 출처: https://docs.spring.io/spring-security/reference/migration-7/configuration.html
@@ -78,4 +76,66 @@ public AuthenticationManager authenticationManager(){
     authProvider.setPasswordEncoder(getPassWordEncoder());
     return new ProviderManager(authProvider);
 }
+```
+
+<br/>
+
+## local에서 CORS 설정 테스트하기
+
+### 테스트용 스크립트
+* terminal을 사용합니다
+* 출처: https://beanbroker.github.io/2019/12/01/etc/cors_curl
+
+```shell
+curl -I -X OPTIONS \
+  -H "Origin: http://localhost:8090" \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Content-Type: application/json' \
+  http://localhost:8080/api/v1/home
+```
+
+<br/>
+
+### 결과 예시
+
+```shell
+curl -I -X OPTIONS \
+  -H "Origin: http://localhost:8999" \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Content-Type: application/json' \
+  http://localhost:8080/api/v1/home
+HTTP/1.1 403
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Transfer-Encoding: chunked
+Date: Tue, 25 Jul 2023 07:30:00 GMT
+```
+```shell
+curl -I -X OPTIONS \
+  -H "Origin: http://localhost:8090" \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Content-Type: application/json' \
+  http://localhost:8080/api/v1/home
+HTTP/1.1 200
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Access-Control-Allow-Origin: http://localhost:8090
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Credentials: true
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 0
+Date: Tue, 25 Jul 2023 07:30:04 GMT
 ```
