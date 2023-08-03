@@ -116,7 +116,26 @@ public AuthenticationManager authenticationManager(){
 
 <br/>
 
-### 2. AuthorizationFilter에서 사용하지 않는 authenticationManager를 제외하고 Filter를 구현하는 방법
+### 2. login url을 custom 하는 법
+* 로그인을 담당하는 filter에 url을 맵핑시켜준다
+* 예제 : https://github.com/devwuu/vet_2023
+* 출처 : https://stackoverflow.com/questions/49583373/how-to-change-login-url-in-spring-security
+
+```java
+
+   @Bean
+    public AdminAuthenticationFilter adminAuthenticationFilter(){
+	...
+        adminAuthenticationFilter.setFilterProcessesUrl("/admin/token");
+        adminAuthenticationFilter.setPostOnly(true);
+        return adminAuthenticationFilter;
+    }
+
+```
+
+<br/>
+
+### 3. AuthorizationFilter에서 사용하지 않는 authenticationManager를 제외하고 Filter를 구현하는 방법
 * OncePerRequestFilter 를 상속받는다
 * 이 경우엔 Filter를 등록할 때 Filter의 순서를 정해줘야한다
 * 예제 : https://github.com/devwuu/vet_2023
