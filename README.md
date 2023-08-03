@@ -80,6 +80,119 @@ public AuthenticationManager authenticationManager(){
 
 <br/>
 
+## Further Study 
+
+### 1. 여러개의 SecurtyFilterChain 등록하는 방법
+* securityMatchers 함수를 사용합니다
+* 예제 : https://github.com/devwuu/vet_2023
+* 출처 : https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html](https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html#use-new-security-matchers
+* 출처 : https://www.danvega.dev/blog/2023/04/20/multiple-spring-security-configs/
+
+```java
+
+    @Bean
+    public SecurityFilterChain clientFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatchers((matchers) -> matchers
+                        .requestMatchers("client/**", "v1/client/**")
+                )
+		...
+
+        return http.build();
+    }
+
+    @Bean
+    public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatchers((matchers) -> matchers
+                        .requestMatchers("admin/**", "v1/admin/**")
+                )
+		...
+
+        return http.build();
+    }
+
+```
+
+<br/>
+
+### 2. AuthorizationFilter에서 사용하지 않는 authenticationManager를 제외하고 Filter를 구현하는 방법
+* OncePerRequestFilter 를 상속받는다
+* 이 경우엔 Filter를 등록할 때 Filter의 순서를 정해줘야한다
+* 예제 : https://github.com/devwuu/vet_2023
+* 출처 : https://www.toptal.com/spring/spring-security-tutorial
+
+```java
+
+package com.web.vt.security;
+
+import com.auth0.jwt.JWT;
+import com.web.vt.utils.StringUtil;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+public class AdminAuthorizationFilter extends OncePerRequestFilter {
+
+    private final AdminDetailService adminDetailService;
+
+    public AdminAuthorizationFilter(AdminDetailService adminDetailService) {
+        this.adminDetailService = adminDetailService;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String authorization = request.getHeader("Authorization");
+
+        if(StringUtil.isEmpty(authorization) || !StringUtil.startsWith(authorization, JwtProperties.PRE_FIX)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String id = JWT.require(JwtProperties.SIGN)
+                .build()
+                .verify(StringUtil.remove(authorization, JwtProperties.PRE_FIX))
+                .getClaim("id")
+                .asString();
+
+        AdminPrincipal principal = (AdminPrincipal) adminDetailService.loadUserByUsername(id);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(token);
+        filterChain.doFilter(request, response);
+    }
+
+}
+
+```
+
+```java
+
+    @Bean
+    public AdminAuthorizationFilter adminAuthorizationFilter(){
+        return new AdminAuthorizationFilter(adminDetailService());
+    }
+
+    @Bean
+    public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
+        http
+		...
+                .addFilter(adminAuthenticationFilter())
+                .addFilterBefore(adminAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+```
+
+<br/>
+
 ## local에서 CORS 설정 테스트하기
 
 ### 테스트용 스크립트
