@@ -82,10 +82,10 @@ public AuthenticationManager authenticationManager(){
 
 ## Further Study 
 
-### 1. 여러개의 SecurtyFilterChain 등록하는 방법
+### 1. 여러개의 SecurityFilterChain 등록하는 방법
 * securityMatchers 함수를 사용합니다
 * 예제 : https://github.com/devwuu/vet_2023
-* 출처 : https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html](https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html#use-new-security-matchers
+* 출처 : https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html#use-new-security-matchers
 * 출처 : https://www.danvega.dev/blog/2023/04/20/multiple-spring-security-configs/
 
 ```java
