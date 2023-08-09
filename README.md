@@ -219,7 +219,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 * 추가로 JwtProvider를 구현하여 JWT 토큰 발급, 인증 로직 등을 공통화하면 AuthenticationFilter나 AuthorizationFilter에서 Property에 직접 의존하는 걸 막고 유지보수성을 높일 수 있다
 * 예제 : https://github.com/devwuu/vet_2023
 * 출처 : https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.typesafe-configuration-properties.relaxed-binding
-* 출처 :https://velog.io/@max9106/Spring-Boot-외부설정-4xk69h8o50
+* 출처 : https://velog.io/@max9106/Spring-Boot-외부설정-4xk69h8o50
 
 ```yml
 ...
@@ -285,6 +285,50 @@ public class AppConfiguration {
 
 }
 
+```
+
+<br/>
+
+### 5. 테스트
+* MockMvc를 사용하는 경우, MockMvcBuilders에 WebApplicationContext, springSecurity를 셋팅하고 build한다
+* UserDetail을 사용해야 하는 경우, @WithUserDetails 어노테이션을 사용한다.
+	* userDetailsServiceBeanName 은 custom한 userDetailService 이고 value는 username이다
+	* 지정한 userDetailService에서 지정한 Username으로 user를 조회한다
+* 3번처럼 profile이 나눠져있는 경우 @ActiveProfiles 어노테이션을 사용한다
+* 예제 : https://github.com/devwuu/vet_2023
+* 출처 : https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/setup.html
+* 출처 : https://tecoble.techcourse.co.kr/post/2020-09-30-spring-security-test/
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+@Disabled
+@Transactional
+@ActiveProfiles("local")
+public class ControllerTestSupporter {
+
+    protected MockMvc mvc;
+    ...
+
+    @BeforeEach
+    void setUp(WebApplicationContext context, RestDocumentationContextProvider provider) {
+
+        mvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                ...
+                .build();
+    }
+
+}
+
+```
+
+```java
+@WithUserDetails(userDetailsServiceBeanName = "employeeDetailService", value = "test")
+class ReservationClientControllerTest extends ControllerTestSupporter {
+	...
+}
 ```
 
 <br/>
