@@ -212,6 +212,83 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
 <br/>
 
+### 4. JWT Property(JWT 설정) 환경별로 분리하기
+* application-{환경}.yml로 각 환경별로 설정을 분리한다
+* yml의 속성값을 읽어오는 class를 작성한다
+* Application을 실행할 때 Active Profile을 설정해준다
+* 추가로 JwtProvider를 구현하여 JWT 토큰 발급, 인증 로직 등을 공통화하면 AuthenticationFilter나 AuthorizationFilter에서 Property에 직접 의존하는 걸 막고 유지보수성을 높일 수 있다
+* 예제 : https://github.com/devwuu/vet_2023
+* 출처 : https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.typesafe-configuration-properties.relaxed-binding
+* 출처 :https://velog.io/@max9106/Spring-Boot-외부설정-4xk69h8o50
+
+```yml
+...
+spring:
+  config:
+    activate:
+      on-profile: dev
+app:
+  security:
+    jwt:
+      secret: dev
+      limit: 10
+      issuer: localhost:8090
+...
+```
+
+```yml
+...
+spring:
+  config:
+    activate:
+      on-profile: local
+...
+app:
+  security:
+    jwt:
+      secret: local
+      limit: 1440
+      issuer: localhost:8080
+
+...
+```
+
+```java
+
+@ConfigurationProperties(prefix = "app.security.jwt")
+@Getter @Setter
+public class JwtProperties {
+
+    private String secret;
+    private int limit;
+    private String issuer;
+    private String prefix = "Bearer ";
+
+    public Instant getExpiredTime(){
+        return LocalDateTime.now().plusMinutes(limit).toInstant(ZoneOffset.UTC);
+    }
+
+    public Algorithm getSign(){
+        return Algorithm.HMAC256(secret);
+    }
+
+}
+
+```
+
+```java
+@Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+public class AppConfiguration {
+
+...
+
+}
+
+```
+
+<br/>
+
 ## local에서 CORS 설정 테스트하기
 
 ### 테스트용 스크립트
