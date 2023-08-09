@@ -84,7 +84,7 @@ public AuthenticationManager authenticationManager(){
 
 ### 1. 여러개의 SecurityFilterChain 등록하는 방법
 * securityMatchers 함수를 사용합니다
-* 예제 : https://github.com/devwuu/vet_2023
+* 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://docs.spring.io/spring-security/reference/5.8/migration/servlet/config.html#use-new-security-matchers
 * 출처 : https://www.danvega.dev/blog/2023/04/20/multiple-spring-security-configs/
 
@@ -118,7 +118,7 @@ public AuthenticationManager authenticationManager(){
 
 ### 2. login url을 custom 하는 법
 * 로그인을 담당하는 filter에 url을 맵핑시켜준다
-* 예제 : https://github.com/devwuu/vet_2023
+* 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://stackoverflow.com/questions/49583373/how-to-change-login-url-in-spring-security
 
 ```java
@@ -138,7 +138,7 @@ public AuthenticationManager authenticationManager(){
 ### 3. AuthorizationFilter에서 사용하지 않는 authenticationManager를 제외하고 Filter를 구현하는 방법
 * OncePerRequestFilter 를 상속받는다
 * 이 경우엔 Filter를 등록할 때 Filter의 순서를 정해줘야한다
-* 예제 : https://github.com/devwuu/vet_2023
+* 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://www.toptal.com/spring/spring-security-tutorial
 
 ```java
@@ -217,7 +217,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 * yml의 속성값을 읽어오는 class를 작성한다
 * Application을 실행할 때 Active Profile을 설정해준다
 * 추가로 JwtProvider를 구현하여 JWT 토큰 발급, 인증 로직 등을 공통화하면 AuthenticationFilter나 AuthorizationFilter에서 Property에 직접 의존하는 걸 막고 유지보수성을 높일 수 있다
-* 예제 : https://github.com/devwuu/vet_2023
+* 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.typesafe-configuration-properties.relaxed-binding
 * 출처 : https://velog.io/@max9106/Spring-Boot-외부설정-4xk69h8o50
 
@@ -295,7 +295,7 @@ public class AppConfiguration {
 	* userDetailsServiceBeanName 은 custom한 userDetailService 이고 value는 username이다
 	* 지정한 userDetailService에서 지정한 Username으로 user를 조회한다
 * 3번처럼 profile이 나눠져있는 경우 @ActiveProfiles 어노테이션을 사용한다
-* 예제 : https://github.com/devwuu/vet_2023
+* 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/setup.html
 * 출처 : https://tecoble.techcourse.co.kr/post/2020-09-30-spring-security-test/
 
