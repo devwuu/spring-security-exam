@@ -138,6 +138,9 @@ public AuthenticationManager authenticationManager(){
 ### 3. AuthorizationFilter에서 사용하지 않는 authenticationManager를 제외하고 Filter를 구현하는 방법
 * OncePerRequestFilter 를 상속받는다
 * 이 경우엔 Filter를 등록할 때 Filter의 순서를 정해줘야한다
+* 주의 : OncePerRequestFilter의 경우 Bean으로 등록하면 securityMatchers에 관계 없이 모든 filterChain에 등록되기 때문에   
+  (1) filterChain이 복수개일 경우 Bean으로 등록하지 않거나(new 연산자로 filterChain에 등록)   
+  (2) shouldNotFilter() 메서드를 overriding하여 제외시킬 url을 등록해준다
 * 예제 : https://github.com/devwuu/VRS_VETReservationSystem
 * 출처 : https://www.toptal.com/spring/spring-security-tutorial
 
@@ -187,8 +190,12 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String url = request.getRequestURI();
+        return Stream.of("/client/**", "/v1/client/**").anyMatch(x -> new AntPathMatcher().match(x, url));
+    }
 }
-
 ```
 
 ```java
@@ -207,6 +214,73 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
         return http.build();
     }
+
+```
+
+또는
+
+```java
+
+package com.web.vt.security;
+
+import com.auth0.jwt.JWT;
+import com.web.vt.utils.StringUtil;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+public class AdminAuthorizationFilter extends OncePerRequestFilter {
+
+    private final AdminDetailService adminDetailService;
+
+    public AdminAuthorizationFilter(AdminDetailService adminDetailService) {
+        this.adminDetailService = adminDetailService;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String authorization = request.getHeader("Authorization");
+
+        if(StringUtil.isEmpty(authorization) || !StringUtil.startsWith(authorization, JwtProperties.PRE_FIX)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String id = JWT.require(JwtProperties.SIGN)
+                .build()
+                .verify(StringUtil.remove(authorization, JwtProperties.PRE_FIX))
+                .getClaim("id")
+                .asString();
+
+        AdminPrincipal principal = (AdminPrincipal) adminDetailService.loadUserByUsername(id);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(token);
+        filterChain.doFilter(request, response);
+    }
+}
+```
+
+```java
+    @Bean
+    public SecurityFilterChain adminFilterChain(HttpSecurity http,
+                                                @Qualifier("adminAuthenticationFilter") UserAuthenticationFilter authenticationFilter,
+                                                        AdminDetailService detailService,
+                                                        JwtUtil jwtUtil) throws Exception {
+            http
+            ....
+            .addFilter(authenticationFilter)
+            .addFilterBefore(new UserAuthorizationFilter(detailService, jwtUtil), AuthorizationFilter.class)
+            .addFilterAt(new FilterExceptionHandler(), ExceptionTranslationFilter.class);
+    
+            return http.build();
+        }
 
 ```
 
